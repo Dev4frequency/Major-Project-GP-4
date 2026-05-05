@@ -13,7 +13,10 @@ export default function Learning() {
     <Shell>
       <div className="max-w-3xl pt-6 pb-10">
         <button onClick={() => nav("/modules")} className="text-xs text-muted-foreground hover:text-foreground mb-3">← All modules</button>
-        <div className="text-[10px] uppercase tracking-[0.3em] text-primary mb-2">{mod.track}</div>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="chip">{mod.track}</span>
+          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">{mod.level} · {mod.duration}</span>
+        </div>
         <h1 className="font-display text-5xl text-gradient">{mod.title}</h1>
         <p className="text-muted-foreground mt-3">{mod.blurb}</p>
 
