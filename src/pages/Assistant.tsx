@@ -134,8 +134,11 @@ export default function Assistant() {
                   }`}
                 >
                   {m.role === "assistant" ? (
-                    <div className="prose prose-sm prose-invert max-w-none prose-p:my-2 prose-headings:my-3 prose-pre:my-2 prose-pre:bg-background/60 prose-pre:text-xs prose-code:text-primary">
-                      <ReactMarkdown>{m.content || "…"}</ReactMarkdown>
+                    <div>
+                      <div className="prose prose-sm prose-invert max-w-none prose-p:my-2 prose-headings:my-3 prose-pre:my-2 prose-pre:bg-background/60 prose-pre:text-xs prose-code:text-primary">
+                        <ReactMarkdown>{stripActions(m.content) || "…"}</ReactMarkdown>
+                      </div>
+                      <ActionButtons content={m.content} onNavigate={(p) => nav(p)} />
                     </div>
                   ) : (
                     <p className="whitespace-pre-wrap">{m.content}</p>
