@@ -11,6 +11,8 @@ export type Progress = {
   completedModules: string[];
   practiceScore: Record<string, number>;
   assignmentsDone: string[];
+  /** ISO yyyy-mm-dd dates on which the user did any activity */
+  activityDates: string[];
 };
 
 type AppCtx = {
@@ -28,6 +30,7 @@ type AppCtx = {
 const Ctx = createContext<AppCtx | null>(null);
 
 const KEY = "dev-assistant-state";
+const today = () => new Date().toISOString().slice(0, 10);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -35,6 +38,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     completedModules: [],
     practiceScore: {},
     assignmentsDone: [],
+    activityDates: [],
   });
   const [selectedTrack, setSelectedTrack] = useState<string | null>(null);
 
@@ -44,7 +48,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (raw) {
         const s = JSON.parse(raw);
         setUser(s.user ?? null);
-        setProgress(s.progress ?? { completedModules: [], practiceScore: {}, assignmentsDone: [] });
+        setProgress({
+          completedModules: s.progress?.completedModules ?? [],
+          practiceScore: s.progress?.practiceScore ?? {},
+          assignmentsDone: s.progress?.assignmentsDone ?? [],
+          activityDates: s.progress?.activityDates ?? [],
+        });
         setSelectedTrack(s.selectedTrack ?? null);
       }
     } catch {}
@@ -53,6 +62,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     localStorage.setItem(KEY, JSON.stringify({ user, progress, selectedTrack }));
   }, [user, progress, selectedTrack]);
+
+  const touchActivity = (p: Progress): Progress => {
+    const t = today();
+    return p.activityDates.includes(t) ? p : { ...p, activityDates: [...p.activityDates, t] };
+  };
 
   return (
     <Ctx.Provider
@@ -63,13 +77,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
         progress,
         completeModule: (id) =>
           setProgress((p) =>
-            p.completedModules.includes(id) ? p : { ...p, completedModules: [...p.completedModules, id] }
+            touchActivity(
+              p.completedModules.includes(id) ? p : { ...p, completedModules: [...p.completedModules, id] }
+            )
           ),
         setPracticeScore: (id, score) =>
-          setProgress((p) => ({ ...p, practiceScore: { ...p.practiceScore, [id]: score } })),
+          setProgress((p) => touchActivity({ ...p, practiceScore: { ...p.practiceScore, [id]: score } })),
         completeAssignment: (id) =>
           setProgress((p) =>
-            p.assignmentsDone.includes(id) ? p : { ...p, assignmentsDone: [...p.assignmentsDone, id] }
+            touchActivity(
+              p.assignmentsDone.includes(id) ? p : { ...p, assignmentsDone: [...p.assignmentsDone, id] }
+            )
           ),
         selectedTrack,
         setSelectedTrack,
