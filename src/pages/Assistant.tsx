@@ -10,6 +10,45 @@ type Msg = { role: "user" | "assistant"; content: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
+const ACTION_RE = /\[\[(OPEN|GOTO):([^|\]]+)\|([^\]]+)\]\]/g;
+
+function stripActions(text: string) {
+  return text.replace(ACTION_RE, "").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function parseActions(text: string): { kind: "OPEN" | "GOTO"; target: string; label: string }[] {
+  const out: { kind: "OPEN" | "GOTO"; target: string; label: string }[] = [];
+  const seen = new Set<string>();
+  let m: RegExpExecArray | null;
+  ACTION_RE.lastIndex = 0;
+  while ((m = ACTION_RE.exec(text)) !== null) {
+    const key = `${m[1]}:${m[2]}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ kind: m[1] as "OPEN" | "GOTO", target: m[2].trim(), label: m[3].trim() });
+  }
+  return out;
+}
+
+function ActionButtons({ content, onNavigate }: { content: string; onNavigate: (path: string) => void }) {
+  const actions = parseActions(content);
+  if (!actions.length) return null;
+  return (
+    <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-border/50">
+      {actions.map((a, i) => (
+        <button
+          key={i}
+          onClick={() => onNavigate(a.kind === "OPEN" ? `/modules/${a.target}` : a.target)}
+          className="text-xs px-3 py-1.5 rounded-full bg-primary/15 hover:bg-primary/25 border border-primary/40 text-primary-foreground/90 transition-colors"
+        >
+          {a.kind === "OPEN" ? "→ Open " : "→ "}{a.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+
 const SUGGESTIONS = [
   "I want to learn DSA",
   "Explain Big-O like I'm five",
