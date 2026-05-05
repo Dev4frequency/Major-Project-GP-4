@@ -39,14 +39,20 @@ function ActionButtons({ content, onNavigate }: { content: string; onNavigate: (
         <button
           key={i}
           onClick={() => onNavigate(a.kind === "OPEN" ? `/modules/${a.target}` : a.target)}
-          className="text-xs px-3 py-1.5 rounded-full bg-primary/15 hover:bg-primary/25 border border-primary/40 text-primary-foreground/90 transition-colors"
+          style={{ animationDelay: `${i * 80}ms`, animationFillMode: "both" }}
+          className="group relative overflow-hidden text-xs px-4 py-2 rounded-full bg-primary/15 hover:bg-primary/25 border border-primary/40 text-primary-foreground/90 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_hsl(var(--primary)/0.45)] hover:-translate-y-0.5 animate-[fade-in_0.4s_ease-out,slide-in-right_0.4s_ease-out]"
         >
-          {a.kind === "OPEN" ? "→ Open " : "→ "}{a.label}
+          <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-primary/30 to-transparent group-hover:translate-x-full transition-transform duration-700 ease-out" />
+          <span className="relative inline-flex items-center gap-1.5">
+            <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+            <span>{a.kind === "OPEN" ? `Open ${a.label}` : a.label}</span>
+          </span>
         </button>
       ))}
     </div>
   );
 }
+
 
 
 const SUGGESTIONS = [
