@@ -97,19 +97,20 @@
   .aurora-bg::before {
     content: "";
     position: absolute;
-    inset: -10%;
-    background: var(--gradient-aurora);
-    animation: aurora 18s ease-in-out infinite alternate;
-    filter: blur(40px);
+    inset: -5%;
+    background-image: url('/cherry.gif');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.20;
+    filter: blur(1.5px) saturate(110%) hue-rotate(70deg);
   }
   .aurora-bg::after {
     content: "";
     position: absolute;
     inset: 0;
-    background-image:
-      radial-gradient(circle at 1px 1px, hsl(152 60% 60% / 0.06) 1px, transparent 0);
-    background-size: 32px 32px;
-    mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 30%, transparent 80%);
+    background:
+      var(--gradient-aurora),
+      linear-gradient(180deg, hsl(160 18% 5% / 0.55), hsl(160 18% 5% / 0.78));
   }
   .glow-ring {
     box-shadow: 0 0 0 1px hsl(var(--emerald) / 0.25), var(--shadow-glow);
