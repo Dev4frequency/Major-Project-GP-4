@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Shell from "@/components/Shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useApp } from "@/context/AppContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -20,8 +21,10 @@ export default function Auth() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", linkedin: "", leetcode: "" });
-  const { login } = useApp();
+  const { authUser } = useApp();
   const nav = useNavigate();
+
+  useEffect(() => { if (authUser) nav("/intro", { replace: true }); }, [authUser, nav]);
 
   const update = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -31,25 +34,32 @@ export default function Auth() {
     try {
       if (mode === "signup") {
         const parsed = signupSchema.safeParse(form);
-        if (!parsed.success) {
-          toast.error(parsed.error.issues[0].message);
-          return;
+        if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
+        const redirectUrl = `${window.location.origin}/intro`;
+        const { data, error } = await supabase.auth.signUp({
+          email: form.email,
+          password: form.password,
+          options: {
+            emailRedirectTo: redirectUrl,
+            data: { display_name: form.name },
+          },
+        });
+        if (error) { toast.error(error.message); return; }
+        if (data.user) {
+          await supabase.from("profiles").update({
+            display_name: form.name, linkedin: form.linkedin || null, leetcode: form.leetcode || null,
+          }).eq("user_id", data.user.id);
         }
+        toast.success("Account created — check your email if confirmation is required.");
+        nav("/intro");
       } else {
         if (!form.email || !form.password) { toast.error("Email and password required"); return; }
+        const { error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
+        if (error) { toast.error(error.message); return; }
+        toast.success("Welcome back");
+        nav("/intro");
       }
-      await new Promise((r) => setTimeout(r, 600));
-      login({
-        name: form.name || form.email.split("@")[0],
-        email: form.email,
-        linkedin: form.linkedin,
-        leetcode: form.leetcode,
-      });
-      toast.success(mode === "login" ? "Welcome back" : "Account created");
-      nav("/intro");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
@@ -65,13 +75,8 @@ export default function Auth() {
 
           <div className="grid grid-cols-2 mb-6 p-1 glass-soft rounded-full text-sm">
             {(["login", "signup"] as const).map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`py-2 rounded-full transition-all ${
-                  mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-                }`}
-              >
+              <button key={m} onClick={() => setMode(m)}
+                className={`py-2 rounded-full transition-all ${mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
                 {m === "login" ? "Sign in" : "Sign up"}
               </button>
             ))}
