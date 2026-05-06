@@ -46,8 +46,8 @@ export default function IDE() {
     }, 500);
   };
 
-  const submit = () => {
-    if (problem) completeAssignment(problem.id);
+  const submit = async () => {
+    if (problem && mod) await completeAssignment(mod.id, problem.id, code, lang);
     exitFullscreen();
     toast.success("Submission accepted");
     nav("/dashboard");

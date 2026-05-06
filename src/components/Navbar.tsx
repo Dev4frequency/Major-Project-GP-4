@@ -32,7 +32,7 @@ export default function Navbar() {
             {user ? (
               <>
                 <span className="hidden sm:block text-xs text-muted-foreground">{user.name}</span>
-                <Button variant="ghost" size="sm" onClick={() => { logout(); nav("/"); }}>Sign out</Button>
+                <Button variant="ghost" size="sm" onClick={async () => { await logout(); nav("/"); }}>Sign out</Button>
               </>
             ) : (
               <Button variant="ghost" size="sm" onClick={() => nav("/auth")}>Sign in</Button>
