@@ -16,6 +16,7 @@ import Assignment from "./pages/Assignment";
 import IDE from "./pages/IDE";
 import Dashboard from "./pages/Dashboard";
 import Team from "./pages/Team";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/assignment/:id" element={<Protected><Assignment /></Protected>} />
             <Route path="/ide/:id/:problemId" element={<Protected><IDE /></Protected>} />
             <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
+            <Route path="/admin" element={<Protected><Admin /></Protected>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

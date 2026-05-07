@@ -3,7 +3,7 @@ import { useApp } from "@/context/AppContext";
 import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
-  const { user, logout } = useApp();
+  const { user, profile, logout } = useApp();
   const nav = useNavigate();
 
   const linkCls = ({ isActive }: { isActive: boolean }) =>
@@ -31,6 +31,14 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             {user ? (
               <>
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt={user.name}
+                    className="h-8 w-8 rounded-full object-cover ring-1 ring-white/20" />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-primary/20 grid place-items-center text-[10px] font-semibold ring-1 ring-white/20">
+                    {user.name.slice(0, 1).toUpperCase()}
+                  </div>
+                )}
                 <span className="hidden sm:block text-xs text-muted-foreground">{user.name}</span>
                 <Button variant="ghost" size="sm" onClick={async () => { await logout(); nav("/"); }}>Sign out</Button>
               </>

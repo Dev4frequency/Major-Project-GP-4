@@ -1,3 +1,11 @@
+export type ModuleSection = {
+  id: string;
+  heading: string;
+  body: string;
+  bullets?: string[];
+  code?: { language: string; snippet: string }[];
+};
+
 export type Module = {
   id: string;
   track: string;
@@ -6,6 +14,7 @@ export type Module = {
   level: "Beginner" | "Intermediate" | "Advanced";
   duration: string;
   lessons: { heading: string; body: string; example?: string }[];
+  sections?: ModuleSection[];
 };
 
 export const TRACKS = ["DSA", "System Design", "Web", "Databases", "DevOps"];

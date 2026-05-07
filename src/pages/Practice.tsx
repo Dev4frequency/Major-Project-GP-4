@@ -7,6 +7,7 @@ import { useApp } from "@/context/AppContext";
 import { enterFullscreen, exitFullscreen, useMonitor, DEFAULT_RULES, MonitorRules } from "@/hooks/useMonitor";
 import MonitorHUD from "@/components/MonitorHUD";
 import RulesEditor from "@/components/RulesEditor";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const DURATION = 15 * 60;
@@ -15,7 +16,7 @@ export default function Practice() {
   const { id } = useParams();
   const nav = useNavigate();
   const mod = MODULES.find((m) => m.id === id);
-  const { setPracticeScore, completeModule } = useApp();
+  const { setPracticeScore, completeModule, authUser } = useApp();
 
   const [started, setStarted] = useState(false);
   const [idx, setIdx] = useState(0);
@@ -24,7 +25,21 @@ export default function Practice() {
   const [terminated, setTerminated] = useState(false);
   const [rules, setRules] = useState<MonitorRules>(DEFAULT_RULES);
 
-  const onTerminate = useCallback(() => { setTerminated(true); exitFullscreen(); }, []);
+  const onTerminate = useCallback(async () => {
+    setTerminated(true);
+    exitFullscreen();
+    if (authUser && mod) {
+      await supabase.from("monitor_events").insert({
+        user_id: authUser.id, kind: "terminate", session_kind: "practice",
+        module_id: mod.id, detail: "Strike limit reached — practice terminated.",
+      });
+      // Save the failed attempt with terminated=true
+      const score = answers.reduce((s, a, i) => (a === MCQS[i].a ? s + 1 : s), 0);
+      await setPracticeScore(mod.id, score, MCQS.length, answers, DURATION - time, 0, true);
+    }
+    toast.error("Test terminated — redirecting to dashboard.");
+    setTimeout(() => nav("/dashboard", { replace: true }), 1200);
+  }, [authUser, mod, answers, time, nav, setPracticeScore]);
   const { violations, events, maxStrikes } = useMonitor({ active: started && !terminated, onTerminate, rules });
 
   useEffect(() => {

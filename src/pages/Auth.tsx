@@ -8,6 +8,7 @@ import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
+import AvatarPicker from "@/components/AvatarPicker";
 
 const signupSchema = z.object({
   name: z.string().trim().min(2, "Name too short").max(80),
@@ -21,12 +22,24 @@ export default function Auth() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", linkedin: "", leetcode: "" });
+  const [avatar, setAvatar] = useState<File | null>(null);
   const { authUser } = useApp();
   const nav = useNavigate();
 
   useEffect(() => { if (authUser) nav("/intro", { replace: true }); }, [authUser, nav]);
 
   const update = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const uploadAvatar = async (uid: string, file: File) => {
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
+    const path = `${uid}/avatar.${ext}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, {
+      upsert: true, contentType: file.type,
+    });
+    if (error) { console.warn(error); return null; }
+    const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+    return data.publicUrl;
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,16 +59,26 @@ export default function Auth() {
         });
         if (error) { toast.error(error.message); return; }
         if (data.user) {
+          let avatarUrl: string | null = null;
+          if (avatar) avatarUrl = await uploadAvatar(data.user.id, avatar);
           await supabase.from("profiles").update({
-            display_name: form.name, linkedin: form.linkedin || null, leetcode: form.leetcode || null,
+            display_name: form.name,
+            linkedin: form.linkedin || null,
+            leetcode: form.leetcode || null,
+            ...(avatarUrl ? { avatar_url: avatarUrl } : {}),
           }).eq("user_id", data.user.id);
         }
-        toast.success("Account created — check your email if confirmation is required.");
+        toast.success("Account created — welcome!");
         nav("/intro");
       } else {
         if (!form.email || !form.password) { toast.error("Email and password required"); return; }
-        const { error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
         if (error) { toast.error(error.message); return; }
+        // Optionally upload/replace avatar on login if one was picked
+        if (avatar && data.user) {
+          const url = await uploadAvatar(data.user.id, avatar);
+          if (url) await supabase.from("profiles").update({ avatar_url: url }).eq("user_id", data.user.id);
+        }
         toast.success("Welcome back");
         nav("/intro");
       }
@@ -75,11 +98,15 @@ export default function Auth() {
 
           <div className="grid grid-cols-2 mb-6 p-1 glass-soft rounded-full text-sm">
             {(["login", "signup"] as const).map((m) => (
-              <button key={m} onClick={() => setMode(m)}
+              <button key={m} type="button" onClick={() => setMode(m)}
                 className={`py-2 rounded-full transition-all ${mode === m ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>
                 {m === "login" ? "Sign in" : "Sign up"}
               </button>
             ))}
+          </div>
+
+          <div className="flex justify-center mb-5">
+            <AvatarPicker value={avatar} onChange={setAvatar} label={mode === "signup" ? "Add passport photo" : "Update photo"} />
           </div>
 
           <form onSubmit={submit} className="space-y-4">

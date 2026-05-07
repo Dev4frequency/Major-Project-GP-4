@@ -18,9 +18,10 @@ export default function Modules() {
     <Shell>
       <div className="pt-6 pb-8">
         <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-2">Modules</div>
-        <h1 className="font-display text-5xl text-gradient">Pick a topic to begin</h1>
+        <h1 className="font-display text-5xl text-glow-white">Pick a topic to begin</h1>
         <p className="text-muted-foreground mt-3 max-w-xl">
-          Each module flows: Learn → Practice (30 MCQs) → Assignment (IDE). Monitoring activates when you start a test.
+          Each module flows: Learn → Practice (30 MCQs) → Assignment (IDE). Monitoring activates when you start a test —
+          cheat once and the session is terminated.
         </p>
       </div>
 
@@ -48,14 +49,14 @@ export default function Modules() {
             <button
               key={m.id}
               onClick={() => nav(`/modules/${m.id}`)}
-              className="group glass rounded-2xl p-6 text-left hover:-translate-y-1 hover:glow-ring transition-all animate-rise"
-              style={{ animationDelay: `${i * 40}ms` }}
+              className="group glass rounded-2xl p-6 text-left hover-glow-white animate-pop"
+              style={{ animationDelay: `${i * 50}ms` }}
             >
               <div className="flex items-center justify-between mb-4">
                 <span className="chip">{m.track}</span>
                 {done && <span className="text-[10px] uppercase tracking-widest text-emerald">✓ Completed</span>}
               </div>
-              <div className="font-display text-2xl mb-1.5 group-hover:text-emerald transition-colors">{m.title}</div>
+              <div className="font-display text-2xl mb-1.5 text-glow-white group-hover:text-glow-ocean transition-colors">{m.title}</div>
               <div className="text-sm text-muted-foreground leading-relaxed">{m.blurb}</div>
               <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/60 text-[11px] text-muted-foreground">
                 <span>{m.level} · {m.duration}</span>
