@@ -66,6 +66,7 @@ const seed: Msg = {
 
 export default function Assistant() {
   const { authUser } = useApp();
+  const [params] = useSearchParams();
   const [messages, setMessages] = useState<Msg[]>([seed]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -77,6 +78,12 @@ export default function Assistant() {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, streaming]);
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  // Prefill from ?topic= when arriving from a module
+  useEffect(() => {
+    const t = params.get("topic");
+    if (t) setInput(`Explain ${t} in depth and recommend the best path forward.`);
+  }, [params]);
 
   // Load conversation list
   useEffect(() => {
