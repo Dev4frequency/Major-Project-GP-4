@@ -222,18 +222,20 @@ export default function Assistant() {
 
         <div>
           <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-2">AI Assistant</div>
-          <h1 className="font-display text-4xl text-gradient mb-6">What would you like to learn?</h1>
+          <h1 className="font-display text-4xl text-glow-white mb-6">What would you like to learn?</h1>
 
           <div className="glass rounded-3xl p-5 md:p-7 min-h-[60vh] flex flex-col">
             <div className="flex-1 space-y-5 overflow-y-auto pr-1">
               {messages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                    m.role === "user" ? "bg-primary text-primary-foreground" : "glass-soft"
+                    m.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "glass-soft border border-white/10 shadow-[0_0_24px_-6px_hsl(200_100%_60%/0.35)]"
                   }`}>
                     {m.role === "assistant" ? (
                       <div>
-                        <div className="prose prose-sm prose-invert max-w-none prose-p:my-2 prose-headings:my-3 prose-pre:my-2 prose-pre:bg-background/60 prose-pre:text-xs prose-code:text-primary">
+                        <div className="prose prose-sm prose-invert max-w-none prose-p:my-2 prose-headings:my-3 prose-pre:my-2 prose-pre:bg-background/60 prose-pre:text-xs prose-code:text-primary [&_p]:text-glow-white [&_li]:text-glow-white [&_strong]:text-glow-ocean">
                           <ReactMarkdown>{stripActions(m.content) || "…"}</ReactMarkdown>
                         </div>
                         <ActionButtons content={m.content} onNavigate={(p) => nav(p)} />
@@ -259,13 +261,31 @@ export default function Assistant() {
             </div>
 
             {messages.length <= 1 && (
-              <div className="flex flex-wrap gap-2 mt-4">
-                {SUGGESTIONS.map((s) => (
-                  <button key={s} onClick={() => send(s)}
-                    className="text-xs px-3 py-1.5 rounded-full glass-soft hover:border-primary/40 border border-border transition-colors">
-                    {s}
-                  </button>
-                ))}
+              <div className="mt-5 space-y-4">
+                <div>
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Jump into a module</div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                    {MODULES.slice(0, 8).map((m, i) => (
+                      <button key={m.id} onClick={() => nav(`/modules/${m.id}`)}
+                        style={{ animationDelay: `${i * 60}ms` }}
+                        className="text-left glass-soft rounded-xl p-3 hover-glow-white animate-pop">
+                        <div className="text-[9px] uppercase tracking-widest text-muted-foreground">{m.track}</div>
+                        <div className="text-sm font-medium text-glow-white truncate">{m.title}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Or try a question</div>
+                  <div className="flex flex-wrap gap-2">
+                    {SUGGESTIONS.map((s) => (
+                      <button key={s} onClick={() => send(s)}
+                        className="text-xs px-3 py-1.5 rounded-full glass-soft hover:border-primary/40 border border-border transition-colors">
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
