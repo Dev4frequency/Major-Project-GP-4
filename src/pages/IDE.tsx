@@ -7,6 +7,8 @@ import { ASSIGNMENTS, MODULES } from "@/data/content";
 import { enterFullscreen, exitFullscreen, useMonitor, DEFAULT_RULES, MonitorRules } from "@/hooks/useMonitor";
 import MonitorHUD from "@/components/MonitorHUD";
 import RulesEditor from "@/components/RulesEditor";
+import CameraMonitor from "@/components/CameraMonitor";
+import { usePlagiarismMonitor } from "@/hooks/usePlagiarismMonitor";
 import { useApp } from "@/context/AppContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -47,6 +49,16 @@ export default function IDE() {
   }, [authUser, mod, problem, nav]);
 
   const { violations, events, maxStrikes } = useMonitor({ active: started && !terminated, onTerminate, rules });
+  const { flags, onChange: onPlagChange, totalFlags } = usePlagiarismMonitor(started && !terminated);
+
+  const onAbsence = useCallback(async () => {
+    if (!authUser || !mod) return;
+    await supabase.from("monitor_events").insert({
+      user_id: authUser.id, kind: "face-absent", session_kind: "ide",
+      module_id: mod.id, problem_id: problem?.id ?? null,
+      detail: "Face not detected for 5+ seconds.",
+    });
+  }, [authUser, mod, problem]);
 
   const start = async () => {
     if (rules.requireFullscreen) await enterFullscreen();
@@ -119,9 +131,16 @@ export default function IDE() {
             <div className="chip mb-3">IDE · {problem.title}</div>
             <h1 className="font-display text-3xl mb-4 text-glow-white">Ready to code?</h1>
             <p className="text-sm text-muted-foreground">
-              The IDE runs in {rules.requireFullscreen ? "monitored fullscreen" : "monitored mode"}. Cheating
+              The IDE runs in {rules.requireFullscreen ? "monitored fullscreen" : "monitored mode"} with
+              <span className="text-foreground"> webcam attention tracking</span> and
+              <span className="text-foreground"> plagiarism detection</span>. Cheating
               terminates the session and redirects you to the dashboard.
             </p>
+            <ul className="text-xs text-muted-foreground mt-4 space-y-1">
+              <li>• Camera permission will be requested when you start.</li>
+              <li>• Looking away &gt; 5s triggers a face-not-detected warning.</li>
+              <li>• Pasting code from external sources is detected and blocked.</li>
+            </ul>
             <Button className="rounded-full mt-7 px-7" size="lg" onClick={start}>Start Test</Button>
           </div>
           <div className="lg:col-span-2 glass rounded-3xl p-6">
