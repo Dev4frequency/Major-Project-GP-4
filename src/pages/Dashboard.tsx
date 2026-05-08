@@ -86,12 +86,28 @@ export default function Dashboard() {
 
   return (
     <Shell>
-      <div className="pt-6 pb-8">
-        <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-2">Dashboard</div>
-        <h1 className="font-display text-5xl text-gradient">
-          Welcome back{user ? `, ${user.name.split(" ")[0]}` : ""}
-        </h1>
-        <p className="text-muted-foreground mt-2">Your progress at a glance — and where to go next.</p>
+      <div className="pt-6 pb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-2">Dashboard</div>
+          <h1 className="font-display text-5xl text-gradient">
+            Welcome back{user ? `, ${user.name.split(" ")[0]}` : ""}
+          </h1>
+          <p className="text-muted-foreground mt-2">Your progress at a glance — and where to go next.</p>
+        </div>
+        <button
+          onClick={() => nav("/ranks")}
+          className="glass rounded-2xl px-5 py-3 text-left hover-glow-white transition-all flex items-center gap-3"
+          title="View leaderboard"
+        >
+          <div className="text-2xl">{rank?.rank === 1 ? "🥇" : rank?.rank === 2 ? "🥈" : rank?.rank === 3 ? "🥉" : "🏆"}</div>
+          <div>
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Global rank</div>
+            <div className="font-display text-2xl text-glow-ocean">
+              {rank ? (rank.rank ? `#${rank.rank}` : "—") : "…"}
+              {rank && rank.rank > 0 && <span className="text-xs text-muted-foreground ml-1">/ {rank.total}</span>}
+            </div>
+          </div>
+        </button>
       </div>
 
       {/* Top stats */}
