@@ -73,8 +73,8 @@ export default function Team() {
             className="glass rounded-3xl overflow-hidden hover-glow-white animate-pop"
             style={{ animationDelay: `${i * 140}ms` }}
           >
-            <div className="grid grid-cols-[140px_1fr] gap-5 p-5">
-              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-muted">
+            <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[140px_1fr] gap-4 sm:gap-5 p-4 sm:p-5">
+              <div className="aspect-[4/5] overflow-hidden rounded-xl sm:rounded-2xl bg-muted">
                 <img src={d.img} alt={`${d.name} — ${d.role}`} className="w-full h-full object-cover" />
               </div>
               <div>
