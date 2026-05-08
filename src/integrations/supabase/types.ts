@@ -401,6 +401,28 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_url: string
+          avg_score: number
+          composite: number
+          display_name: string
+          longest_streak: number
+          modules_completed: number
+          rank: number
+          total_attempts: number
+          user_id: string
+        }[]
+      }
+      get_user_rank: {
+        Args: { _uid: string }
+        Returns: {
+          composite: number
+          rank: number
+          total_users: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
