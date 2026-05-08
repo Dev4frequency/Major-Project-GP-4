@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Shell from "@/components/Shell";
 import { Button } from "@/components/ui/button";
 
@@ -73,8 +73,8 @@ export default function Team() {
             className="glass rounded-3xl overflow-hidden hover-glow-white animate-pop"
             style={{ animationDelay: `${i * 140}ms` }}
           >
-            <div className="grid grid-cols-[140px_1fr] gap-5 p-5">
-              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-muted">
+            <div className="grid grid-cols-[100px_1fr] sm:grid-cols-[140px_1fr] gap-4 sm:gap-5 p-4 sm:p-5">
+              <div className="aspect-[4/5] overflow-hidden rounded-xl sm:rounded-2xl bg-muted">
                 <img src={d.img} alt={`${d.name} — ${d.role}`} className="w-full h-full object-cover" />
               </div>
               <div>
@@ -97,12 +97,16 @@ export default function Team() {
                   <li key={r} className="flex gap-2"><span className="text-primary">▸</span><span>{r}</span></li>
                 ))}
               </ul>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Codebase ownership</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Codebase ownership · click to open</div>
               <div className="flex flex-wrap gap-1.5">
                 {d.codebase.map((f) => (
-                  <code key={f} className="text-[10px] glass-soft rounded px-2 py-1 font-mono text-muted-foreground">
+                  <Link
+                    key={f}
+                    to={`/file/${f.replace(/\*$/, "").replace(/^\//, "")}`}
+                    className="text-[10px] glass-soft rounded px-2 py-1 font-mono text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors break-all"
+                  >
                     {f}
-                  </code>
+                  </Link>
                 ))}
               </div>
             </div>
