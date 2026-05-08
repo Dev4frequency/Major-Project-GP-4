@@ -182,8 +182,25 @@ export default function IDE() {
               <div>Input: {problem.sample.input}</div>
               <div>Output: {problem.sample.output}</div>
             </div>
-            <div className="mt-5">
+            <div className="mt-5 space-y-3">
+              <CameraMonitor active={started && !terminated} onAbsence={onAbsence} />
               <MonitorHUD violations={violations} maxStrikes={maxStrikes} events={events} />
+              {totalFlags > 0 && (
+                <div className="glass rounded-2xl p-3 text-xs ring-1 ring-destructive/40">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="uppercase tracking-widest text-destructive">Plagiarism flags</span>
+                    <span className="font-mono text-destructive">{totalFlags}</span>
+                  </div>
+                  <ul className="space-y-1.5 max-h-32 overflow-y-auto pr-1">
+                    {flags.slice(0, 4).map((f) => (
+                      <li key={f.id}>
+                        <div className="text-foreground/85">{f.reason}</div>
+                        <div className="text-[10px] text-muted-foreground truncate font-mono">{f.excerpt}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </aside>
 
@@ -210,7 +227,7 @@ export default function IDE() {
                 height="100%"
                 language={lang}
                 value={code}
-                onChange={(v) => setCode(v ?? "")}
+                onChange={(v) => { const next = v ?? ""; onPlagChange(next); setCode(next); }}
                 theme="vs-dark"
                 options={{ fontSize: 13, minimap: { enabled: false }, fontLigatures: true, smoothScrolling: true, padding: { top: 14 } }}
               />
