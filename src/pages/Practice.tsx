@@ -7,6 +7,7 @@ import { useApp } from "@/context/AppContext";
 import { enterFullscreen, exitFullscreen, useMonitor, DEFAULT_RULES, MonitorRules } from "@/hooks/useMonitor";
 import MonitorHUD from "@/components/MonitorHUD";
 import RulesEditor from "@/components/RulesEditor";
+import CameraMonitor from "@/components/CameraMonitor";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -41,6 +42,14 @@ export default function Practice() {
     setTimeout(() => nav("/dashboard", { replace: true }), 1200);
   }, [authUser, mod, answers, time, nav, setPracticeScore]);
   const { violations, events, maxStrikes } = useMonitor({ active: started && !terminated, onTerminate, rules });
+
+  const onAbsence = useCallback(async () => {
+    if (!authUser || !mod) return;
+    await supabase.from("monitor_events").insert({
+      user_id: authUser.id, kind: "face-absent", session_kind: "practice",
+      module_id: mod.id, detail: "Face not detected for 5+ seconds.",
+    });
+  }, [authUser, mod]);
 
   useEffect(() => {
     if (!started || terminated) return;
@@ -164,7 +173,8 @@ export default function Practice() {
         </div>
 
         <aside className="lg:col-span-1">
-          <div className="lg:sticky lg:top-24">
+          <div className="lg:sticky lg:top-24 space-y-3">
+            <CameraMonitor active={started && !terminated} onAbsence={onAbsence} />
             <MonitorHUD violations={violations} maxStrikes={maxStrikes} events={events} />
           </div>
         </aside>
