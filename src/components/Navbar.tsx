@@ -26,6 +26,7 @@ export default function Navbar() {
               <NavLink to="/modules" className={linkCls}>Modules</NavLink>
               <NavLink to="/dashboard" className={linkCls}>Dashboard</NavLink>
               <NavLink to="/team" className={linkCls}>Team</NavLink>
+              <NavLink to="/ranks" className={linkCls}>Ranks</NavLink>
             </div>
           ) : null}
           <div className="flex items-center gap-2">
