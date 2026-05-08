@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Shell from "@/components/Shell";
 import { Button } from "@/components/ui/button";
 import { useApp } from "@/context/AppContext";
 import { MODULES, ASSIGNMENTS, TRACKS } from "@/data/content";
+import { supabase } from "@/integrations/supabase/client";
 
 function computeStreak(dates: string[]): { current: number; longest: number } {
   if (dates.length === 0) return { current: 0, longest: 0 };
@@ -37,8 +38,17 @@ function computeStreak(dates: string[]): { current: number; longest: number } {
 }
 
 export default function Dashboard() {
-  const { user, progress } = useApp();
+  const { user, authUser, progress } = useApp();
   const nav = useNavigate();
+  const [rank, setRank] = useState<{ rank: number; total: number; composite: number } | null>(null);
+
+  useEffect(() => {
+    if (!authUser) return;
+    supabase.rpc("get_user_rank", { _uid: authUser.id }).then(({ data }) => {
+      const row = (data as any)?.[0];
+      if (row) setRank({ rank: Number(row.rank), total: Number(row.total_users), composite: row.composite });
+    });
+  }, [authUser, progress]);
 
   const totalModules = MODULES.length;
   const done = progress.completedModules.length;
